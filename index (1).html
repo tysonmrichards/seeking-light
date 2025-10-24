@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seeking Light: A Book of Mormon Question Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2C5F7D;
+            --secondary-color: #4A8CB5;
+            --accent-color: #F4A261;
+            --light-bg: #F8F9FA;
+            --text-dark: #2C3E50;
+            --text-light: #6C757D;
+            --border-color: #DEE2E6;
+            --success-color: #28A745;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.1em;
+            font-style: italic;
+        }
+
+        .search-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: var(--light-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .question-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-card.expanded {
+            grid-column: 1 / -1;
+        }
+
+        .question-title {
+            color: var(--primary-color);
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .question-preview {
+            color: var(--text-light);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .question-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .question-card.expanded .question-details {
+            display: block;
+        }
+
+        .question-card.expanded .question-preview {
+            display: none;
+        }
+
+        .scriptures-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scripture-ref {
+            background: var(--light-bg);
+            padding: 15px;
+            border-left: 4px solid var(--secondary-color);
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .scripture-citation {
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .scripture-text {
+            color: var(--text-dark);
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        .insight-section {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .insight-text {
+            color: var(--text-dark);
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .expand-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        .expand-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            color: var(--text-light);
+        }
+
+        .no-results h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            background: white;
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            margin-top: 40px;
+            color: var(--text-light);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .questions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        .stats-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ Seeking Light ✨</h1>
+            <p class="subtitle">A Book of Mormon Question Explorer</p>
+            <p style="margin-top: 15px; color: var(--text-light);">
+                "Inspired questions should be considered gifts from God that provide opportunities for us to increase our understanding."
+            </p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">28</div>
+                <div class="stat-label">Gospel Questions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">56</div>
+                <div class="stat-label">Scripture References</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">28</div>
+                <div class="stat-label">Personal Insights</div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search questions, scriptures, or topics...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-category="all">All Questions</button>
+                <button class="filter-btn" data-category="faith">Faith & Testimony</button>
+                <button class="filter-btn" data-category="atonement">Atonement & Grace</button>
+                <button class="filter-btn" data-category="prayer">Prayer & Worship</button>
+                <button class="filter-btn" data-category="repentance">Repentance & Change</button>
+                <button class="filter-btn" data-category="service">Service & Charity</button>
+                <button class="filter-btn" data-category="questions">Doubt & Questions</button>
+            </div>
+        </div>
+
+        <div class="questions-grid" id="questionsGrid">
+            <!-- Questions will be dynamically inserted here -->
+        </div>
+
+        <footer>
+            <p><strong>Creative Discipleship Project</strong></p>
+            <p>RELA 122: Book of Mormon</p>
+            <p style="margin-top: 10px; font-style: italic;">
+                "Awake, and arouse your faculties...and experiment upon my words." - Alma 32:27
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                category: "faith",
+                question: "How can I develop faith when I don't have perfect knowledge?",
+                preview: "Alma teaches that faith is not about having all the answers, but about acting on what you hope to be true...",
+                scriptures: [
+                    {
+                        reference: "Alma 32:21",
+                        text: "Faith is not to have a perfect knowledge of things; therefore if ye have faith ye hope for things which are not seen, which are true."
+                    },
+                    {
+                        reference: "Alma 32:27-28",
+                        text: "Experiment upon my words...if it is a true seed, or a good seed...it will begin to swell within your breasts; and when you feel these swelling motions, ye will begin to say within yourselves—It must needs be that this is a good seed."
+                    }
+                ],
+                insight: "I've learned that faith isn't about eliminating all doubt—it's about planting the seed and watching it grow in darkness. Like Alma teaches, sometimes growth happens beneath the surface where we can't see it. My faith has grown most when I've been willing to experiment on God's words, living as if they were true even when I wasn't completely sure. The 'swelling motions' Alma describes are real—I've felt my soul enlarge, my understanding enlighten, and truth become delicious to me. Faith is choosing to act in the space between hope and certainty."
+            },
+            {
+                id: 2,
+                category: "questions",
+                question: "Is it okay to have questions and doubts about the gospel?",
+                preview: "The course teaches us to 'step toward and lean into our questions rather than fearing them'...",
+                scriptures: [
+                    {
+                        reference: "Alma 32:27",
+                        text: "Even if ye can no more than desire to believe, let this desire work in you, even until ye believe in a manner that ye can give place for a portion of my words."
+                    },
+                    {
+                        reference: "Ether 12:6",
+                        text: "Dispute not because ye see not, for ye receive no witness until after the trial of your faith."
+                    }
+                ],
+                insight: "One of the most liberating truths I've discovered in this class is that 'inspired questions should be considered gifts from God.' Questions aren't signs of weakness—they're invitations to deeper understanding. Alma doesn't condemn the Zoramites for struggling to believe; instead, he meets them where they are and says 'even if ye can no more than desire to believe.' My journey has taught me that God honors honest questions. The process of seeking answers has strengthened my faith more than if I had been given easy answers from the beginning."
+            },
+            {
+                id: 3,
+                category: "atonement",
+                question: "How does the Atonement of Jesus Christ apply to my daily struggles and weaknesses?",
+                preview: "The infinite Atonement covers not just our sins, but all our pains, afflictions, and weaknesses...",
+                scriptures: [
+                    {
+                        reference: "Alma 7:11-12",
+                        text: "And he shall go forth, suffering pains and afflictions and temptations of every kind...that he may know according to the flesh how to succor his people according to their infirmities."
+                    },
+                    {
+                        reference: "Ether 12:27",
+                        text: "My grace is sufficient for all men that humble themselves before me; for if they humble themselves before me, and have faith in me, then will I make weak things become strong unto them."
+                    }
+                ],
+                insight: "Understanding that Christ's Atonement encompasses all suffering—not just sin—has transformed my relationship with Him. When I'm struggling with anxiety, disappointment, or feeling inadequate, I remember that He suffered these things too 'that he may know according to the flesh how to succor his people.' The promise that 'my grace is sufficient' and that weak things can become strong has given me hope. I've learned that His Atonement isn't just about fixing what's broken; it's about transforming who we are becoming."
+            },
+            {
+                id: 4,
+                category: "repentance",
+                question: "What does true repentance look like, and how do I know if I've been forgiven?",
+                preview: "Alma's conversion story shows us the pain of sin and the joy of redemption through Christ...",
+                scriptures: [
+                    {
+                        reference: "Alma 36:18-21",
+                        text: "Now, as my mind caught hold upon this thought, I cried within my heart: O Jesus, thou Son of God, have mercy on me...And now, behold, when I thought this, I could remember my pains no more; yea, I was harrowed up by the memory of my sins no more. And oh, what joy, and what marvelous light I did behold."
+                    },
+                    {
+                        reference: "Mosiah 4:3",
+                        text: "The Spirit of the Lord came upon them, and they were filled with joy, having received a remission of their sins, and having peace of conscience, because of the exceeding faith which they had in Jesus Christ."
+                    }
+                ],
+                insight: "Alma's chiastic testimony has taught me that genuine repentance centers on Christ. When I focus on Christ's mercy rather than just my guilt, transformation happens. The sign of forgiveness isn't perfection—it's peace. I've experienced what King Benjamin's people felt: 'peace of conscience.' True repentance isn't about endlessly punishing myself; it's about turning to Christ and allowing His grace to change me. The joy Alma describes is real and available to all of us who call upon His name."
+            },
+            {
+                id: 5,
+                category: "prayer",
+                question: "How do I pray when I don't feel worthy or when heaven seems silent?",
+                preview: "The Book of Mormon teaches us about prayer in all circumstances, not just when we feel spiritual...",
+                scriptures: [
+                    {
+                        reference: "Alma 34:17-27",
+                        text: "Cry unto him in your houses, yea, over all your household...Cry unto him over the crops of your fields...Yea, cry unto him against the power of your enemies...when you do not cry unto the Lord, let your hearts be full, drawn out in prayer unto him continually."
+                    },
+                    {
+                        reference: "Alma 31:31-35",
+                        text: "Alma's prayer: O Lord, wilt thou comfort my soul, and give unto me success...O Lord, wilt thou grant unto us that we may have strength, that we may bear with patience these afflictions which shall come upon us."
+                    }
+                ],
+                insight: "Alma's prayer in Alma 31 changed how I approach God. He doesn't ask for his suffering to be removed—just for strength to endure it. This taught me that prayer isn't about being worthy enough; it's about being honest enough. Amulek's teaching to pray 'continually' has shown me that prayer is more than formal words—it's maintaining a relationship with God throughout my day. Even when I don't feel spiritual, I can 'let my heart be full, drawn out in prayer' as I work, study, and live."
+            },
+            {
+                id: 6,
+                category: "faith",
+                question: "What does it mean to 'experiment upon the word'?",
+                preview: "Alma invites us to test God's promises by acting on them and watching for growth...",
+                scriptures: [
+                    {
+                        reference: "Alma 32:27",
+                        text: "Awake and arouse your faculties, even to an experiment upon my words, and exercise a particle of faith."
+                    },
+                    {
+                        reference: "Alma 32:28-30",
+                        text: "If it...beginneth to enlarge my soul; yea, it beginneth to enlighten my understanding, yea, it beginneth to be delicious to me...it must needs be that this is a good seed."
+                    }
+                ],
+                insight: "Experimenting on God's words has become my favorite approach to building faith. Instead of waiting for perfect knowledge, I've learned to plant a seed and watch for these signs: Does my soul enlarge? Does my understanding enlighten? Is truth becoming delicious to me? These aren't abstract concepts—I've experienced them. When I've acted on promptings to serve, read scriptures, or forgive, I've felt these 'swelling motions' Alma describes. The experiment works, but only when I'm willing to plant the seed and nurture it."
+            },
+            {
+                id: 7,
+                category: "atonement",
+                question: "How can Jesus Christ truly understand my specific struggles?",
+                preview: "Christ descended below all things to comprehend every human experience...",
+                scriptures: [
+                    {
+                        reference: "Alma 7:11-12",
+                        text: "He will take upon him their infirmities, that his bowels may be filled with mercy...that he may know according to the flesh how to succor his people."
+                    },
+                    {
+                        reference: "2 Nephi 9:21",
+                        text: "He suffereth the pains of all men, yea, the pains of every living creature, both men, women, and children."
+                    }
+                ],
+                insight: "This question haunted me until I really studied Alma 7. Christ didn't just suffer for sin—He suffered our 'pains and afflictions and temptations of every kind.' He experienced loneliness, rejection, anxiety, grief, and physical pain 'according to the flesh' so He would know how to help us. This means He literally understands what I'm going through. When I feel alone in my struggles, I remember that Someone has been there, felt it, and overcame it. That knowledge changes everything."
+            },
+            {
+                id: 8,
+                category: "service",
+                question: "Why is service to others so central to discipleship?",
+                preview: "King Benjamin teaches that service to others is service to God...",
+                scriptures: [
+                    {
+                        reference: "Mosiah 2:17",
+                        text: "When ye are in the service of your fellow beings ye are only in the service of your God."
+                    },
+                    {
+                        reference: "Mosiah 4:26",
+                        text: "I would that ye should impart of your substance to the poor...administering to their relief, both spiritually and temporally, according to their wants."
+                    }
+                ],
+                insight: "King Benjamin's words revolutionized how I see service. It's not just a good deed—it's literally serving God. This reframes everything. When I help someone struggling, comfort someone grieving, or share what I have, I'm directly serving my Heavenly Father. This has motivated me to look for daily opportunities to serve, not out of obligation but out of love. Service has become my way of expressing gratitude for all God has given me."
+            },
+            {
+                id: 9,
+                category: "faith",
+                question: "How do I maintain faith during trials and unanswered prayers?",
+                preview: "The Book of Mormon shows us examples of faith that endures through uncertainty...",
+                scriptures: [
+                    {
+                        reference: "Ether 12:6",
+                        text: "Ye receive no witness until after the trial of your faith."
+                    },
+                    {
+                        reference: "Mosiah 24:14-15",
+                        text: "I will ease the burdens which are put upon your shoulders, that even you cannot feel them upon your backs...And now it came to pass that the burdens which were laid upon Alma and his brethren were made light."
+                    }
+                ],
+                insight: "The principle that witnesses come 'after the trial of faith' has helped me endure difficult seasons. Sometimes God doesn't remove our burdens immediately—instead, He makes them light as we trust Him. I've experienced this: challenges that once felt crushing became bearable as I continued to have faith. The key insight from Alma's experience is that God promises to be with us in our trials, not necessarily to remove them instantly. Faith means trusting the process even when answers don't come on my timeline."
+            },
+            {
+                id: 10,
+                category: "repentance",
+                question: "Can I really change, or am I stuck being who I am?",
+                preview: "The Book of Mormon testifies that the Atonement enables real, lasting change...",
+                scriptures: [
+                    {
+                        reference: "Mosiah 5:2",
+                        text: "The Spirit of the Lord Omnipotent...has wrought a mighty change in us, or in our hearts, that we have no more disposition to do evil, but to do good continually."
+                    },
+                    {
+                        reference: "Alma 5:14",
+                        text: "Have ye spiritually been born of God? Have ye received his image in your countenances? Have ye experienced this mighty change in your hearts?"
+                    }
+                ],
+                insight: "Alma's question 'have ye experienced this mighty change?' gives me hope that transformation is possible. The Atonement doesn't just forgive—it changes us. I've witnessed this in my own life: patterns I thought were permanent have begun to shift as I've consistently turned to Christ. The change isn't always dramatic like Alma's, but it's real. The key is that it's not just my willpower—it's Christ's grace working in me. His power can change who I am at the core."
+            },
+            {
+                id: 11,
+                category: "questions",
+                question: "How do I find answers to my gospel questions?",
+                preview: "The inspired question research process teaches us to seek truth from multiple sources...",
+                scriptures: [
+                    {
+                        reference: "Moroni 10:4-5",
+                        text: "Ask God, the Eternal Father, in the name of Christ, if these things are not true...he will manifest the truth of it unto you, by the power of the Holy Ghost."
+                    },
+                    {
+                        reference: "2 Nephi 32:3",
+                        text: "Feast upon the words of Christ; for behold, the words of Christ will tell you all things what ye should do."
+                    }
+                ],
+                insight: "This class taught me a systematic approach to finding answers: search the scriptures, study Church leaders' teachings, and explore scholarly sources. But most importantly, I've learned to ask God directly. Moroni's promise is real—when I ask with real intent, God does manifest truth through the Holy Ghost. The process of seeking has strengthened my faith even when answers are incomplete. I've learned that sometimes the journey of searching is as important as finding the answer."
+            },
+            {
+                id: 12,
+                category: "prayer",
+                question: "What if I don't know what to pray for?",
+                preview: "The Book of Mormon teaches us to pray about all aspects of our lives...",
+                scriptures: [
+                    {
+                        reference: "Alma 34:18-27",
+                        text: "Cry unto him when ye are in your fields...over your flocks...in your houses...over your household...morning, mid-day, and evening."
+                    },
+                    {
+                        reference: "3 Nephi 18:19-20",
+                        text: "Pray in your families...always pray unto the Father in my name...Therefore ye must always pray unto the Father in my name."
+                    }
+                ],
+                insight: "Amulek's teachings freed me from thinking prayer has to be formal or perfect. I can pray about my crops (my work), my flocks (my responsibilities), my household (my relationships)—everything matters to God. When I don't know what to pray for, I simply talk to Him about what's on my mind. Sometimes my most meaningful prayers have been the simplest: 'Help me today. I need you.' Prayer isn't about eloquence; it's about maintaining a relationship with my Heavenly Father."
+            },
+            {
+                id: 13,
+                category: "atonement",
+                question: "What does it mean that Christ's grace is 'sufficient'?",
+                preview: "Grace doesn't just cover our sins—it empowers us to become more than we could alone...",
+                scriptures: [
+                    {
+                        reference: "Ether 12:27",
+                        text: "My grace is sufficient for all men that humble themselves before me...then will I make weak things become strong unto them."
+                    },
+                    {
+                        reference: "2 Nephi 25:23",
+                        text: "It is by grace that we are saved, after all we can do."
+                    }
+                ],
+                insight: "The promise that Christ's grace is 'sufficient' has sustained me through my weaknesses. It means His power is enough—I don't have to be perfect on my own. But sufficiency doesn't mean I do nothing; grace works 'after all we can do.' I bring my best effort, however imperfect, and Christ makes up the difference. More beautifully, His grace doesn't just save me despite my weaknesses—it transforms them into strengths. This has given me courage to keep trying even when I fail."
+            },
+            {
+                id: 14,
+                category: "faith",
+                question: "How can I know if something is true?",
+                preview: "The Holy Ghost testifies of truth to our minds and hearts...",
+                scriptures: [
+                    {
+                        reference: "Moroni 10:4-5",
+                        text: "Ask God...if these things are not true; and if ye shall ask with a sincere heart, with real intent, having faith in Christ, he will manifest the truth of it unto you."
+                    },
+                    {
+                        reference: "Alma 32:34-35",
+                        text: "Then is your knowledge perfect? Behold I say unto you, Nay...your knowledge is perfect in that thing...your faith is dormant; and this because you know."
+                    }
+                ],
+                insight: "Moroni's promise has been my anchor. When I've asked with 'real intent,' the Holy Ghost has confirmed truth to me in ways I can't fully articulate—a burning in my heart, peace, enlightenment. But Alma's insight is crucial too: knowledge comes line upon line. Even when I receive a witness, my faith still needs to be exercised in new areas. Truth is confirmed through the Spirit, but the seeking never ends. Each answer leads to new questions, and that's okay."
+            },
+            {
+                id: 15,
+                category: "service",
+                question: "What is charity, and how do I develop it?",
+                preview: "Mormon and Moroni teach that charity is the pure love of Christ...",
+                scriptures: [
+                    {
+                        reference: "Moroni 7:47",
+                        text: "Charity is the pure love of Christ, and it endureth forever; and whoso is found possessed of it at the last day, it shall be well with him."
+                    },
+                    {
+                        reference: "Moroni 7:48",
+                        text: "Pray unto the Father with all the energy of heart, that ye may be filled with this love...that ye may become the sons of God."
+                    }
+                ],
+                insight: "Understanding that charity is 'the pure love of Christ' changed everything for me. It's not just being nice—it's loving as Christ loves. And Mormon teaches that we receive this gift by praying for it 'with all the energy of heart.' I've learned that charity develops as I practice seeing others as Christ sees them. When I struggle to love someone, I pray to see their potential, their struggles, their divine nature. Charity is both a gift from God and something I cultivate through choosing to love even when it's difficult."
+            },
+            {
+                id: 16,
+                category: "repentance",
+                question: "How do I overcome persistent sins or bad habits?",
+                preview: "The power of Christ can help us overcome even deeply rooted patterns...",
+                scriptures: [
+                    {
+                        reference: "Mosiah 3:19",
+                        text: "The natural man is an enemy to God...unless he yields to the enticings of the Holy Spirit, and putteth off the natural man and becometh a saint through the atonement of Christ."
+                    },
+                    {
+                        reference: "Helaman 5:12",
+                        text: "Remember, remember...it is upon the rock of our Redeemer, who is Christ...that ye must build your foundation."
+                    }
+                ],
+                insight: "The teaching that I must 'put off the natural man' through Christ's Atonement has given me hope for real change. Overcoming persistent sins isn't just about willpower—it's about building my foundation on Christ. When I've struggled with recurring weaknesses, I've learned to turn to Him immediately rather than trying to fix myself first. Helaman's repeated 'remember, remember' has become my mantra. When I remember Christ and build on His foundation, I find strength I don't have on my own to resist temptation and change patterns."
+            },
+            {
+                id: 17,
+                category: "questions",
+                question: "What if my doubts seem too big to overcome?",
+                preview: "Even prophets like Nephi struggled with feelings of inadequacy and questions...",
+                scriptures: [
+                    {
+                        reference: "2 Nephi 4:17-19",
+                        text: "My heart exclaimeth: O wretched man that I am! Yea, my heart sorroweth...Nevertheless, I know in whom I have trusted."
+                    },
+                    {
+                        reference: "Ether 12:27",
+                        text: "I give unto men weakness that they may be humble...if men come unto me I will show unto them their weakness...my grace is sufficient."
+                    }
+                ],
+                insight: "Reading Nephi's psalm—where a prophet expresses feeling 'wretched' and sorrowful—gave me permission to struggle. Even faithful people have doubts and hard days. The key is what Nephi does next: 'Nevertheless, I know in whom I have trusted.' My doubts don't have to define me. I can acknowledge them while still choosing to trust in Christ. God gives us weakness intentionally so we'll turn to Him. My biggest doubts have ultimately led me to deeper faith as I've worked through them with God's help."
+            },
+            {
+                id: 18,
+                category: "faith",
+                question: "How do I recognize the Holy Ghost in my life?",
+                preview: "The Spirit speaks to our hearts and minds in gentle, powerful ways...",
+                scriptures: [
+                    {
+                        reference: "3 Nephi 11:3",
+                        text: "It was not a harsh voice, neither was it a loud voice; nevertheless...it did pierce them that did hear to the center...it did pierce them to the very soul."
+                    },
+                    {
+                        reference: "1 Nephi 17:45",
+                        text: "Ye were past feeling, that ye could not feel his words."
+                    }
+                ],
+                insight: "The description of God's voice as 'not harsh...not loud' but still piercing to the soul has helped me recognize how the Spirit works. I used to expect dramatic experiences, but I've learned the Spirit usually speaks quietly—a thought, a feeling of peace, gentle promptings. The warning about being 'past feeling' has motivated me to stay spiritually sensitive through daily prayer and scripture study. The more I practice listening, the better I become at recognizing His voice among all the other noise in my life."
+            },
+            {
+                id: 19,
+                category: "prayer",
+                question: "Does God really care about the small details of my life?",
+                preview: "The Lord teaches us to pray about everything, no matter how small...",
+                scriptures: [
+                    {
+                        reference: "Alma 37:6-7",
+                        text: "By small and simple things are great things brought to pass...by very small means the Lord...bringeth about the salvation of many souls."
+                    },
+                    {
+                        reference: "Alma 34:20-26",
+                        text: "Cry unto him over the crops of your fields...over your flocks...against the power of your enemies...that ye may not be consumed."
+                    }
+                ],
+                insight: "Alma's teaching that 'small and simple things' bring about great things has changed how I approach prayer. God cares about my daily concerns—my work, my relationships, my decisions. Nothing is too small to pray about. I've experienced His hand in seemingly minor details that turned out to be significant. Praying about everything keeps me connected to Him throughout my day and helps me see His involvement in all aspects of my life. He's not just a Sunday God—He's with me in every moment."
+            },
+            {
+                id: 20,
+                category: "atonement",
+                question: "How does the Atonement work for people who never hear about Christ?",
+                preview: "The Book of Mormon teaches that Christ's mercy extends to all of God's children...",
+                scriptures: [
+                    {
+                        reference: "2 Nephi 9:25-26",
+                        text: "He cometh into the world that he may save all men if they will hearken unto his voice...they who have died not knowing the will of God...neither transgressed against him."
+                    },
+                    {
+                        reference: "Mosiah 3:11",
+                        text: "The blood of Christ atoneth for their sins...for salvation cometh to none such except it be through repentance and faith on the Lord Jesus Christ."
+                    }
+                ],
+                insight: "This question troubled me until I studied these verses. God's justice and mercy ensure that everyone has a fair opportunity to accept Christ—whether in this life or the next. Those who die 'not knowing the will of God' are saved through Christ's infinite Atonement. This doesn't mean everyone is automatically saved, but it means God's plan is perfectly just and merciful. No one is lost due to circumstances beyond their control. This knowledge has deepened my appreciation for how thoroughly Christ's Atonement covers all of Heavenly Father's children."
+            },
+            {
+                id: 21,
+                category: "repentance",
+                question: "What if I keep making the same mistakes over and over?",
+                preview: "Christ's Atonement is infinite—there's no limit to how many times we can repent...",
+                scriptures: [
+                    {
+                        reference: "Moroni 6:8",
+                        text: "As oft as they repented and sought forgiveness, with real intent, they were forgiven."
+                    },
+                    {
+                        reference: "3 Nephi 9:22",
+                        text: "Will ye not now return unto me, and repent of your sins, and be converted, that I may heal you?"
+                    }
+                ],
+                insight: "The phrase 'as oft as they repented' gives me hope. Christ doesn't keep count of how many times I stumble. When I come to Him with 'real intent,' He forgives—every single time. This doesn't mean I take repentance lightly, but it means I don't have to fear that I've used up my chances. The invitation to 'return unto me' is always open. I've learned that genuine repentance means learning from my mistakes and trying to do better, not achieving perfection immediately. Christ's patience with me teaches me to be patient with myself."
+            },
+            {
+                id: 22,
+                category: "service",
+                question: "How can I serve others when I'm struggling myself?",
+                preview: "Sometimes serving others while we're struggling brings healing to both parties...",
+                scriptures: [
+                    {
+                        reference: "Mosiah 18:8-9",
+                        text: "Willing to bear one another's burdens, that they may be light...willing to mourn with those that mourn...comfort those that stand in need of comfort."
+                    },
+                    {
+                        reference: "Mosiah 2:17",
+                        text: "When ye are in the service of your fellow beings ye are only in the service of your God."
+                    }
+                ],
+                insight: "The covenant to 'mourn with those that mourn' has taught me that I don't have to be perfect or problem-free to serve others. Sometimes my struggles help me empathize better with others' pain. I've discovered that serving others while I'm struggling often helps me heal too. When I shift focus from my problems to someone else's needs, I find perspective and purpose. We're meant to bear each other's burdens—not perfectly, but genuinely. My struggles don't disqualify me from service; they can actually make me a more compassionate servant."
+            },
+            {
+                id: 23,
+                category: "faith",
+                question: "What does it mean to 'come unto Christ'?",
+                preview: "Coming unto Christ means more than just believing—it's about actively building a relationship with Him...",
+                scriptures: [
+                    {
+                        reference: "Omni 1:26",
+                        text: "Come unto him, and offer your whole souls as an offering unto him."
+                    },
+                    {
+                        reference: "3 Nephi 27:27",
+                        text: "What manner of men ought ye to be? Verily I say unto you, even as I am."
+                    }
+                ],
+                insight: "The invitation to 'offer your whole souls' shows that coming unto Christ isn't passive—it requires giving everything to Him. But this isn't about perfection; it's about surrender and trust. I'm learning that coming unto Christ means daily choosing to align my will with His, inviting Him into every aspect of my life. Christ asks us to become 'even as I am,' which seems impossible, but that's where His grace comes in. Coming unto Christ is a journey of gradually becoming more like Him through His enabling power."
+            },
+            {
+                id: 24,
+                category: "questions",
+                question: "How do I balance intellectual honesty with faith?",
+                preview: "Faith and reason aren't opposites—they work together in our quest for truth...",
+                scriptures: [
+                    {
+                        reference: "Alma 32:27",
+                        text: "Awake and arouse your faculties, even to an experiment upon my words."
+                    },
+                    {
+                        reference: "D&C 9:8",
+                        text: "You must study it out in your mind; then you must ask me if it be right."
+                    }
+                ],
+                insight: "Alma's invitation to 'arouse your faculties' validates using our minds in matters of faith. The inspired question research process taught me that seeking truth involves both intellectual rigor and spiritual confirmation. I study, ponder, research, and think critically—then I seek spiritual witness. Neither replaces the other. Some of my most profound spiritual experiences have come while deeply studying difficult questions. Faith isn't blind belief; it's choosing to trust while continuing to learn and question. God gave us minds to use them."
+            },
+            {
+                id: 25,
+                category: "atonement",
+                question: "What does it mean to have a 'broken heart and contrite spirit'?",
+                preview: "These aren't just feelings—they represent a willingness to change and submit to God...",
+                scriptures: [
+                    {
+                        reference: "3 Nephi 9:20",
+                        text: "Ye shall offer for a sacrifice unto me a broken heart and a contrite spirit."
+                    },
+                    {
+                        reference: "3 Nephi 12:19",
+                        text: "Whoso cometh unto me with a broken heart and a contrite spirit, him will I baptize with fire and with the Holy Ghost."
+                    }
+                ],
+                insight: "I used to think a broken heart meant feeling sad, but I've learned it means being broken of pride and self-will—being teachable and willing to change. A contrite spirit means being humble enough to recognize my need for Christ. These aren't one-time achievements but ongoing attitudes. When I approach God with this humility—acknowledging I can't save myself and surrendering my will to His—that's when He can truly work in my life. The 'sacrifice' isn't suffering for suffering's sake; it's the sacrifice of my ego and independence."
+            },
+            {
+                id: 26,
+                category: "prayer",
+                question: "Why should I pray if God already knows what I need?",
+                preview: "Prayer isn't just about informing God—it's about building relationship and changing us...",
+                scriptures: [
+                    {
+                        reference: "Alma 34:27",
+                        text: "Let your hearts be full, drawn out in prayer unto him continually for your welfare, and also for the welfare of those who are around you."
+                    },
+                    {
+                        reference: "Enos 1:2-4",
+                        text: "The words which I had often heard my father speak...sunk deep into my heart...I kneeled down before my Maker, and I cried unto him in mighty prayer."
+                    }
+                ],
+                insight: "Enos's experience taught me that prayer changes ME, not God. God already knows what I need, but I need the process of communicating with Him. Prayer draws my heart out to God, aligns my will with His, and keeps me connected to Him. It's not about getting God's attention—it's about giving Him mine. Through prayer, I process my thoughts, express gratitude, seek guidance, and maintain relationship with my Heavenly Father. The more I pray, the more I become the person He wants me to be."
+            },
+            {
+                id: 27,
+                category: "faith",
+                question: "How do I stay faithful when life doesn't go as planned?",
+                preview: "The people of Alma learned that God doesn't always remove trials, but He makes them bearable...",
+                scriptures: [
+                    {
+                        reference: "Mosiah 24:14-15",
+                        text: "I will also ease the burdens which are put upon your shoulders, that even you cannot feel them...and this will I do that ye may stand as witnesses for me hereafter."
+                    },
+                    {
+                        reference: "2 Nephi 2:11",
+                        text: "It must needs be, that there is an opposition in all things."
+                    }
+                ],
+                insight: "God's promise to Alma's people transformed my perspective on trials. He didn't remove their burdens immediately—He made them light while they carried them. I've experienced this: challenges that seemed unbearable became manageable as I trusted God. Opposition is necessary for growth. My life hasn't gone as planned, but I've learned that God's plan is better than mine. Staying faithful doesn't mean never feeling disappointed; it means trusting that God is working even when I can't see how. His timing is perfect, even when it's not my timing."
+            },
+            {
+                id: 28,
+                category: "service",
+                question: "What does it mean to 'succor' others, and how can I do it?",
+                preview: "To succor means to help, comfort, and lift in practical, meaningful ways...",
+                scriptures: [
+                    {
+                        reference: "Alma 7:12",
+                        text: "He will take upon him their infirmities...that he may know according to the flesh how to succor his people according to their infirmities."
+                    },
+                    {
+                        reference: "Mosiah 4:16",
+                        text: "Ye will administer of your substance unto him that standeth in need...both spiritually and temporally, according to his wants."
+                    }
+                ],
+                insight: "Christ's example of succoring shows me that helping others means understanding their specific needs and meeting them where they are. Succoring isn't just offering generic help—it's providing what that person actually needs, whether spiritual comfort or temporal assistance. I've learned to ask 'What do you need?' rather than assuming I know. Sometimes succoring means listening, sometimes it means practical help, sometimes it means just being present. Christ can succor us perfectly because He experienced our infirmities. I can succor others imperfectly but meaningfully by caring enough to truly understand and help."
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentSearch = '';
+
+        function renderQuestions() {
+            const grid = document.getElementById('questionsGrid');
+            const filtered = questions.filter(q => {
+                const matchesCategory = currentFilter === 'all' || q.category === currentFilter;
+                const matchesSearch = currentSearch === '' || 
+                    q.question.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                    q.preview.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                    q.scriptures.some(s => 
+                        s.reference.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                        s.text.toLowerCase().includes(currentSearch.toLowerCase())
+                    );
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <h3>No questions found</h3>
+                        <p>Try adjusting your search or filter</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(q => `
+                <div class="question-card" data-id="${q.id}">
+                    <div class="category-badge">${getCategoryName(q.category)}</div>
+                    <h3 class="question-title">${q.question}</h3>
+                    <p class="question-preview">${q.preview}</p>
+                    
+                    <div class="question-details">
+                        <div class="scriptures-section">
+                            <h4 class="section-title">
+                                <span class="icon">📖</span>
+                                Scripture References
+                            </h4>
+                            ${q.scriptures.map(s => `
+                                <div class="scripture-ref">
+                                    <div class="scripture-citation">${s.reference}</div>
+                                    <div class="scripture-text">"${s.text}"</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="insight-section">
+                            <h4 class="section-title">
+                                <span class="icon">💡</span>
+                                Personal Insight
+                            </h4>
+                            <p class="insight-text">${q.insight}</p>
+                        </div>
+                    </div>
+                    
+                    <button class="expand-btn" onclick="toggleCard(${q.id})">
+                        Read More
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'faith': 'Faith & Testimony',
+                'atonement': 'Atonement & Grace',
+                'prayer': 'Prayer & Worship',
+                'repentance': 'Repentance & Change',
+                'service': 'Service & Charity',
+                'questions': 'Doubt & Questions'
+            };
+            return names[category] || category;
+        }
+
+        function toggleCard(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            const isExpanded = card.classList.contains('expanded');
+            
+            // Close all other cards
+            document.querySelectorAll('.question-card').forEach(c => {
+                c.classList.remove('expanded');
+                const btn = c.querySelector('.expand-btn');
+                if (btn) btn.textContent = 'Read More';
+            });
+            
+            // Toggle current card
+            if (!isExpanded) {
+                card.classList.add('expanded');
+                const btn = card.querySelector('.expand-btn');
+                if (btn) btn.textContent = 'Show Less';
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            renderQuestions();
+        });
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.category;
+                renderQuestions();
+            });
+        });
+
+        // Initial render
+        renderQuestions();
+    </script>
+</body>
+</html>
